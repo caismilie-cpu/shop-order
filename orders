@@ -1,0 +1,25 @@
+-- 1、创建orders订单表（如果还没有）
+CREATE TABLE IF NOT EXISTS orders (
+  id bigint primary key generated always as identity,
+  name text,
+  phone text,
+  goods text,
+  total int,
+  create_time text
+);
+
+-- 2、开启RLS安全
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+-- 3、允许前台匿名用户提交订单（插入）
+CREATE POLICY anon_insert_orders ON orders
+FOR INSERT TO anon
+WITH CHECK (true);
+
+-- 4、允许后台页面读取全部订单
+CREATE POLICY anon_select_orders ON orders
+FOR SELECT TO anon
+USING (true);
+
+-- 5、开放表权限给匿名角色
+GRANT SELECT,INSERT ON orders TO anon;
