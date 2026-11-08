@@ -5,44 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>全部订单</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
 body{padding:16px;background:#f5f5f5}
 h2{margin-bottom:12px}
-.order{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px}
-</style>
-</head>
-<body>
-<h2>全部订单</h2>
-<div id="list"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// 和前台一样填你的supabase信息
-const SUPABASE_URL = "粘贴你的Project URL";
-const SUPABASE_KEY = "粘贴你的anon key";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-loadOrder();
-async function loadOrder(){
-  const {data,error} = await supabase.from('orders').select('*').order('id',{asc:false})
-  if(error){
-    document.getElementById("list").innerText="读取失败："+error.message;
-    return;
-  }
-  let html = '';
-  data.forEach(item=>{
-    html += `
-    <div class="order">
-      <div>姓名：${item.name}</div>
-      <div>电话：${item.phone}</div>
-      <div>商品：${item.goods}</div>
-      <div>金额：${item.total}元</div>
-      <div>时间：${item.create_time}</div>
-    </div>
-    `
-  })
-  document.getElementById("list").innerHTML = html;
-}
-</script>
-</body>
-</html>
+.order{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;line-height:1.6}
+.login-box{max-width:320px;margi
