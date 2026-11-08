@@ -13,9 +13,9 @@ body{padding:16px;background:#f5f5f5}
 .info .price{color:#f44336;font-size:14px}
 .qty{display:flex;gap:8px;align-items:center}
 .qty button{width:28px;height:28px;border:none;border-radius:6px;background:#eee;font-size:16px;cursor:pointer}
-.qty input{width:40px;text-align:center;border:1px solid #ddd;border-radius:4px;padding:2px}
+.qty span{width:32px;text-align:center;display:inline-block}
 .total-text{font-size:18px;font-weight:bold;color:#f44336;padding:12px 0}
-input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8px}
+input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8px;font-size:16px}
 #submit{width:100%;padding:12px;border:none;border-radius:8px;background:#f44336;color:#fff;font-size:16px;margin-top:8px;cursor:pointer}
 </style>
 </head>
@@ -28,9 +28,9 @@ input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8
       <div class="price">¥25</div>
     </div>
     <div class="qty">
-      <button class="minus">-</button>
-      <input type="number" class="num" value="0" min="0">
-      <button class="plus">+</button>
+      <button onclick="add(0)">+</button>
+      <span id="q0">0</span>
+      <button onclick="minus(0)">-</button>
     </div>
   </div>
   <div class="item">
@@ -39,9 +39,9 @@ input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8
       <div class="price">¥38</div>
     </div>
     <div class="qty">
-      <button class="minus">-</button>
-      <input type="number" class="num" value="0" min="0">
-      <button class="plus">+</button>
+      <button onclick="add(1)">+</button>
+      <span id="q1">0</span>
+      <button onclick="minus(1)">-</button>
     </div>
   </div>
   <div class="item">
@@ -50,9 +50,9 @@ input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8
       <div class="price">¥16</div>
     </div>
     <div class="qty">
-      <button class="minus">-</button>
-      <input type="number" class="num" value="0" min="0">
-      <button class="plus">+</button>
+      <button onclick="add(2)">+</button>
+      <span id="q2">0</span>
+      <button onclick="minus(2)">-</button>
     </div>
   </div>
   <div class="total-text">合计：<span id="total">0</span> 元</div>
@@ -60,53 +60,54 @@ input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8
 
 <div class="card">
   <input id="name" placeholder="姓名">
-  <input id="phone" placeholder="请输入手机号">
-  <button id="submit">提交订单</button>
+  <input id="phone" type="tel" placeholder="请输入手机号">
+  <button id="submit" onclick="checkOrder()">提交订单</button>
 </div>
 
 <script>
-const priceList = [25,38,16];
-const numInputs = document.querySelectorAll('.num');
-const plusBtns = document.querySelectorAll('.plus');
-const minusBtns = document.querySelectorAll('.minus');
-const totalEl = document.getElementById('total');
+const price = [25,38,16];
+const q = [0,0,0];
 
-// 计算总价
-function calcTotal(){
-  let sum = 0;
-  numInputs.forEach((inp,idx)=>{
-    let n = Number(inp.value) || 0;
-    sum += n * priceList[idx];
-  })
-  totalEl.innerText = sum;
+function add(i){
+  q[i]++;
+  render();
+}
+function minus(i){
+  if(q[i]>0) q[i]--;
+  render();
+}
+function render(){
+  document.getElementById("q0").innerText = q[0];
+  document.getElementById("q1").innerText = q[1];
+  document.getElementById("q2").innerText = q[2];
+  let sum = q[0]*25 + q[1]*38 + q[2]*16;
+  document.getElementById("total").innerText = sum;
 }
 
-// +按钮
-plusBtns.forEach((btn,idx)=>{
-  btn.onclick = function(){
-    let val = Number(numInputs[idx].value) + 1;
-    numInputs[idx].value = val;
-    calcTotal();
-    console.log("点了+，当前数量：",val)
-  }
-})
-// -按钮
-minusBtns.forEach((btn,idx)=>{
-  btn.onclick = function(){
-    let val = Number(numInputs[idx].value) - 1;
-    if(val < 0) val = 0;
-    numInputs[idx].value = val;
-    calcTotal();
-    console.log("点了-，当前数量：",val)
-  }
-})
-numInputs.forEach(inp=>{
-  inp.oninput = calcTotal;
-})
+// 提交前校验
+function checkOrder(){
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const total = q[0]*25 + q[1]*38 + q[2]*16;
 
-//提交暂时先只提示
-document.getElementById('submit').onclick = function(){
-  alert("先把加减调好，再接supabase！")
+  if(!name){
+    alert('请填写姓名');
+    return;
+  }
+  if(!phone){
+    alert('请填写手机号');
+    return;
+  }
+  if(total <= 0){
+    alert('请至少选一件商品');
+    return;
+  }
+  // 这里先弹窗预览订单，等加减没问题我们再接supabase入库
+  let goods = [];
+  if(q[0]>0) goods.push(`商品A×${q[0]}`);
+  if(q[1]>0) goods.push(`商品B×${q[1]}`);
+  if(q[2]>0) goods.push(`商品C×${q[2]}`);
+  alert(`订单预览：\n姓名：${name}\n电话：${phone}\n商品：${goods.join('、')}\n合计：${total}元\n\n✅加减测试正常！后面再接数据库保存`);
 }
 </script>
 </body>
